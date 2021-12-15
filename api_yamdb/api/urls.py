@@ -1,13 +1,13 @@
 from django.urls import include, path
-from rest_framework import routers
 
+from api.routers import CategoryRouter
 from api.views import CategoryViewSet
 
 app_name = 'api'
 
-router = routers.DefaultRouter()
-router.register('category', CategoryViewSet, basename='categories')
+category_router = CategoryRouter()
+category_router.register('category', CategoryViewSet)
 
 urlpatterns = [
-    path('v1/', include(router.urls)),
+    path('v1/', include(category_router.urls))
 ]

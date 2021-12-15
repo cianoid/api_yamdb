@@ -7,6 +7,9 @@ from reviews.models import Category
 
 class CategoryViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
                       mixins.ListModelMixin, mixins.DestroyModelMixin):
+    lookup_field = 'slug'
+    lookup_value_regex = '[-a-zA-Z0-9_]+'
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (CategoryPermission, )
