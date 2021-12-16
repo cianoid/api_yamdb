@@ -35,7 +35,7 @@ python manage.py importdata static/data/genre.csv Genre
 python manage.py importdata static/data/titles.csv Title
 python manage.py importdata --relation-field genre static/data/genre_title.csv Title
 python manage.py importdata static/data/review.csv Review
-python manage.py importdata static/data/comments.csv Comments
+python manage.py importdata static/data/comments.csv Comment
 ```
 
 Помощь по команде находится тут
