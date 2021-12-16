@@ -74,4 +74,4 @@ class Comments(models.Model):
         'comment date', auto_now_add=True)
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ['-created']
