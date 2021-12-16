@@ -64,14 +64,14 @@ class Review(models.Model):
         unique_together = ['author', 'title']
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField('comment text', blank=False)
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'comment date', auto_now_add=True)
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-pub_date']

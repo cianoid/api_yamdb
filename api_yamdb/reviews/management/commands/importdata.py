@@ -5,9 +5,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
-
-# @TODO waiting for merge with other branches
-from reviews.models import Category, Genre, Title, Comments, Review
+from reviews.models import Category, Genre, Title, Comment, Review
 
 User = get_user_model()
 
@@ -27,7 +25,7 @@ class Command(BaseCommand):
         relation_data = {
             Title: {'category': Category},
             Review: {'author': User},
-            Comments: {'author': User},
+            Comment: {'author': User},
         }
 
         rel_data = relation_data.get(model)
@@ -47,7 +45,10 @@ class Command(BaseCommand):
         relation_field = options.get('relation_field')
 
         model_field_id = model_name.lower() + '_id'
-        Model = apps.get_model('reviews', model_name)
+        try:
+            Model = apps.get_model('reviews', model_name)
+        except LookupError:
+            Model = User
 
         if not os.path.isfile(filename):
             self.stderr.write(f'File {filename} not found')
