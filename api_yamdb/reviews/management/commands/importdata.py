@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
 
 # @TODO waiting for merge with other branches
-from reviews.models import Category, Genre, Title #, Comments, Reviews
+from reviews.models import Category, Genre, Title, Comments, Review
 
 User = get_user_model()
 
@@ -26,9 +26,8 @@ class Command(BaseCommand):
     def change_keys(self, model, item):
         relation_data = {
             Title: {'category': Category},
-            # @TODO waiting for merge with other branches
-            # Reviews: {'author': User},
-            # Comments: {'author': User},
+            Review: {'author': User},
+            Comments: {'author': User},
         }
 
         rel_data = relation_data.get(model)
