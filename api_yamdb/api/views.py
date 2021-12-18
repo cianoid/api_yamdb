@@ -1,8 +1,10 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 
 from api.permissions import AdminOrReadOnlyPermission
-from api.serializers import CategorySerializer, GenreSerializer
-from reviews.models import Category, Genre
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             TitleSerializer)
+from reviews.models import Category, Genre, Title
 
 
 class CategoryAndGenreViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
@@ -23,3 +25,12 @@ class CategoryViewSet(CategoryAndGenreViewSet):
 class GenreViewSet(CategoryAndGenreViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+
+    permission_classes = (AdminOrReadOnlyPermission,)
+    filter_backends = (DjangoFilterBackend, )
+    filterset_fields = ('category', 'genre', 'name', 'year')
