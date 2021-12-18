@@ -10,9 +10,8 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
             return False
 
         # @TODO Подумать как сделать лучше
-        # @TODO Ожидание мержа с веткой feature/users
-        # if request.user.role == 'admin' or request.user.is_staff:
-        if request.user.is_staff:
+        # if request.user.is_staff:
+        if request.user.role == 'admin' or request.user.is_staff:
             return True
 
         return False
