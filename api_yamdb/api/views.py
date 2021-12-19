@@ -1,6 +1,7 @@
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, viewsets
 
+from api.filters import TitleFilter
 from api.permissions import AdminOrReadOnlyPermission
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer)
@@ -13,8 +14,8 @@ class CategoryAndGenreViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
     lookup_value_regex = '[-a-zA-Z0-9_]+'
 
     permission_classes = (AdminOrReadOnlyPermission,)
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name', )
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class CategoryViewSet(CategoryAndGenreViewSet):
@@ -32,5 +33,5 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
 
     permission_classes = (AdminOrReadOnlyPermission,)
-    filter_backends = (DjangoFilterBackend, )
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filter_backends = (django_filters.DjangoFilterBackend,)
+    filterset_class = TitleFilter
