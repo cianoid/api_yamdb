@@ -4,7 +4,9 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.routers import CategoryAndGenreRouter
-from api.views import CategoryViewSet, GenreViewSet, TitleViewSet, UserViewSet, send_code_and_create_user
+from api.views import (CategoryViewSet, GenreViewSet, TitleViewSet, 
+                        UserViewSet, send_code_and_create_user,
+                        get_jwt)
 
 app_name = 'api'
 
@@ -38,7 +40,7 @@ urlpatterns = [
     ),
     path(
         'v1/auth/token/',
-        TokenObtainPairView.as_view(),
+        get_jwt,
         name='token_obtain_pair'
     )
 ]

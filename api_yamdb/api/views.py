@@ -11,7 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.filters import TitleFilter
 from api.permissions import AdminOrReadOnlyPermission
 from api.serializers import (CategorySerializer, GenreSerializer,
-                             TitleSerializer, SignUpSerializer)
+                             TitleSerializer, SignUpSerializer,
+                             TokenSerializer)
 from reviews.models import Category, Genre, Title
 from users.models import User
 
@@ -97,9 +98,9 @@ def get_tokens(user):
 @permission_classes([AllowAny])
 def get_jwt(request):
     """Выдаёт JW-токен"""
-    email = request.data['email']
+    username = request.data['username']
     confirmation_code = request.data['confirmation_code']
-    user = get_object_or_404(User, email=email)
+    user = get_object_or_404(User, username=username)
     if not default_token_generator.check_token(
         user, confirmation_code
     ):
