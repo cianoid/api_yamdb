@@ -4,7 +4,7 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.routers import CategoryAndGenreRouter
-from api.views import CategoryViewSet, GenreViewSet, TitleViewSet, UserViewSet, SignUpView
+from api.views import CategoryViewSet, GenreViewSet, TitleViewSet, UserViewSet, send_code_and_create_user
 
 app_name = 'api'
 
@@ -33,7 +33,7 @@ urlpatterns = [
     path('v1/', include(users_router.urls)),
     path(
         'v1/auth/signup/',
-        SignUpView.as_view(),
+        send_code_and_create_user,
         name='sign_up'
     ),
     path(
