@@ -1,6 +1,5 @@
-import uuid
-
 from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
 from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -60,12 +59,12 @@ def send_code_and_create_user(request):
         return Response(
             message, status=status.HTTP_400_BAD_REQUEST
         )
-    confirmation_code = str(uuid.uuid4()) # uuid4 - Generate a random UUID
     serializer = SignUpSerializer(data=request.data)
     if serializer.is_valid:
-        User.objects.create_user(
-            username=email, email=email, password=None
+        user=User.objects.create_user(
+            username=username, email=email, password=None
         )
+        confirmation_code = default_token_generator.make_token(user)
         send_mail(
             'Код подтверждения',
             f'Код подтверждения: {confirmation_code}',
