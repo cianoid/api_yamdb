@@ -1,10 +1,12 @@
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.filters import TitleFilter
 from api.permissions import AdminOrReadOnlyPermission
@@ -53,9 +55,14 @@ def send_code_and_create_user(request):
     и отправляет код подтверждения при регистрации.
     """
     email = request.data.get('email')
-    username = request.data.get('email')
+    username = request.data.get('username')
     if User.objects.filter(email=email).exists():
         message = 'Пользователь с таким email уже существует'
+        return Response(
+            message, status=status.HTTP_400_BAD_REQUEST
+        )
+    if User.objects.filter(username=username).exists():
+        message = 'Пользователь с таким username уже существует'
         return Response(
             message, status=status.HTTP_400_BAD_REQUEST
         )
@@ -76,3 +83,28 @@ def send_code_and_create_user(request):
             status=status.HTTP_201_CREATED
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_tokens(user):
+    """Создаёт токен в нужном формате"""
+    tokens = RefreshToken.for_user(user)
+
+    return {
+        'access': str(tokens.access_token)
+    }
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_jwt(request):
+    """Выдаёт JW-токен"""
+    email = request.data['email']
+    confirmation_code = request.data['confirmation_code']
+    user = get_object_or_404(User, email=email)
+    if not default_token_generator.check_token(
+        user, confirmation_code
+    ):
+        return Response(
+            'Некорректный код подтверждения', status=status.HTTP_400_BAD_REQUEST
+        )
+    response = get_tokens(user)
+    return Response(response, status=status.HTTP_200_OK)
