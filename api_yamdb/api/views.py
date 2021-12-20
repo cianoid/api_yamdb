@@ -49,11 +49,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def send_code_and_create_user(self, request):
+def send_code_and_create_user(request):
     """Создаёт пользователя 
     и отправляет код подтверждения при регистрации.
     """
     email = request.data.get('email')
+    username = request.data.get('email')
     if User.objects.filter(email=email).exists():
         message = 'Пользователь с таким email уже существует'
         return Response(
@@ -63,10 +64,7 @@ def send_code_and_create_user(self, request):
     serializer = SignUpSerializer(data=request.data)
     if serializer.is_valid:
         User.objects.create_user(
-            request.data['email'],
-            username=request.data.get('username'),
-            password='',
-            confirmation_code=confirmation_code
+            username=email, email=email, password=None
         )
         send_mail(
             'Код подтверждения',
