@@ -1,12 +1,18 @@
+import uuid
+
+from django.core.mail import send_mail
 from django_filters import rest_framework as django_filters
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from api.filters import TitleFilter
 from api.permissions import AdminOrReadOnlyPermission
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer)
 from reviews.models import Category, Genre, Title
+from users.models import User
 
 
 class CategoryAndGenreViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
@@ -41,4 +47,32 @@ class UserViewSet(viewsets.ModelViewSet):
     pass
 
 class SignUpView(APIView):
-    pass
+    """Создаёт пользователя 
+    и отправляет код подтверждения при регистрации.
+    """
+    permission_classes = [AllowAny]
+
+    def send_code_and_create_user(self, request):
+        email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+            message = 'Пользователь с таким email уже существует'
+            return Response(
+                message, status=status.HTTP_400_BAD_REQUEST
+            )
+        confirmation_code = str(uuid.uuid4()) # uuid4 - Generate a random UUID
+        User.objects.create_user(
+            request.data['email'],
+            username=request.data.get('username'),
+            password='',
+            confirmation_code=confirmation_code
+        )
+        send_mail(
+            'Код подтверждения',
+            f'Код подтверждения: {confirmation_code}',
+            'info@yamdb.ru',
+            [email,],
+        )
+        return Response(
+            'Код подтверждения отправлен на указанный email',
+            status=status.HTTP_200_OK
+        )
