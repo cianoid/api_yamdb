@@ -30,10 +30,10 @@ class Title(models.Model):
         max_length=256)
     year = models.PositiveSmallIntegerField()
     category = models.ForeignKey(
-        Category, default=0, on_delete=models.SET_DEFAULT,
+        Category, default=0, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='titles')
     genre = models.ManyToManyField(
-        Genre, related_name='titles')
+        Genre, related_name='titles', blank=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
