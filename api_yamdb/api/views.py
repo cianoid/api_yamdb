@@ -1,5 +1,6 @@
 from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, viewsets
+from rest_framework.views import APIView
 
 from api.filters import TitleFilter
 from api.permissions import AdminOrReadOnlyPermission
@@ -35,3 +36,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrReadOnlyPermission,)
     filter_backends = (django_filters.DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+class UserViewSet(viewsets.ModelViewSet):
+    pass
+
+class SignUpView(APIView):
+    pass

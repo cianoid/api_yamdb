@@ -18,7 +18,7 @@ title_router.register('titles', TitleViewSet)
 title_router.registry.extend(category_and_genre_router.registry)
 
 users_router = routers.DefaultRouter()
-users_router.register('users', UserViewSet)
+users_router.register('users', UserViewSet, basename='users')
 
 # зачем каждому свой дефолтный роутер? лучше так:
 # router = = routers.DefaultRouter()
