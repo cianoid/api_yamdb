@@ -35,11 +35,26 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'username', 'bio', 'email', 'role'
         ]
 
+    def validate(self, data):
+        """Запрещает пользователю изменить свою роль
+        """
+        role = self.context['request'].user.role
+        if data.get('role') and role == 'user':
+            raise serializers.ValidationError(
+                'Изменение роли невозможно'
+            )
+        return data
+
+
+class ConfirmationCodeSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
+
 
 class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('email', 'username')
+        fields = ['email', 'username']
         model = User
 
 

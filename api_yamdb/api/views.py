@@ -3,19 +3,19 @@ from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from api.filters import TitleFilter
-from api.permissions import (AdminOrReadOnlyPermission, AdminOnly,
+from api.permissions import (AdminOrReadOnlyPermission, AdminOrSuperuserOnly,
                              AuthorOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer, SignUpSerializer,
-                             UserSerializer)
+                             ConfirmationCodeSerializer, UserSerializer)
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
 
@@ -52,15 +52,28 @@ class TitleViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, AdminOnly]
+    permission_classes = [IsAuthenticated, AdminOrSuperuserOnly]
+
+    @action(detail=False, methods=['get', 'patch'])
+    def me(self, request):
+        user = self.request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data)
+        if request.method == 'PATCH':
+            serializer = self.get_serializer(
+                user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def send_code_and_create_user(request):
-    """Создаёт пользователя
-    и отправляет код подтверждения при регистрации.
-    """
+    """Создаёт пользователя и отправляет код подтверждения"""
     email = request.data.get('email')
     username = request.data.get('username')
     if username == 'me':
@@ -97,31 +110,27 @@ def send_code_and_create_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_tokens(user):
-    """Создаёт токен в нужном формате"""
-    tokens = RefreshToken.for_user(user)
-
-    return {
-        'access': str(tokens.access_token)
-    }
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_jwt(request):
     """Выдаёт JW-токен"""
+    serializer = ConfirmationCodeSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
     username = request.data.get('username')
     confirmation_code = request.data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
-    if not default_token_generator.check_token(
+
+    if default_token_generator.check_token(
         user, confirmation_code
     ):
+        token = RefreshToken.for_user(user)
         return Response(
-            'Некорректный код подтверждения',
-            status=status.HTTP_400_BAD_REQUEST
+            {'token': str(token)}, status=status.HTTP_200_OK
         )
-    response = get_tokens(user)
-    return Response(response, status=status.HTTP_200_OK)
+    return Response(
+        {'confirmation_code': 'Неверный код подтверждения'},
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
