@@ -12,7 +12,7 @@ from api.filters import TitleFilter
 from api.permissions import AdminOrReadOnlyPermission
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer, SignUpSerializer,
-                             TokenSerializer)
+                             UserSerializer)
 from reviews.models import Category, Genre, Title
 from users.models import User
 
@@ -45,31 +45,38 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (django_filters.DjangoFilterBackend,)
     filterset_class = TitleFilter
 
+
 class UserViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def send_code_and_create_user(request):
-    """Создаёт пользователя 
+    """Создаёт пользователя
     и отправляет код подтверждения при регистрации.
     """
     email = request.data.get('email')
     username = request.data.get('username')
-    if User.objects.filter(email=email).exists():
-        message = 'Пользователь с таким email уже существует'
+    if username == 'me':
         return Response(
-            message, status=status.HTTP_400_BAD_REQUEST
+            'Использование такого имени запрещено',
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    if User.objects.filter(email=email).exists():
+        return Response(
+            'Пользователь с таким email уже существует',
+            status=status.HTTP_400_BAD_REQUEST
         )
     if User.objects.filter(username=username).exists():
-        message = 'Пользователь с таким username уже существует'
         return Response(
-            message, status=status.HTTP_400_BAD_REQUEST
+            'Пользователь с таким username уже существует',
+            status=status.HTTP_400_BAD_REQUEST
         )
     serializer = SignUpSerializer(data=request.data)
-    if serializer.is_valid:
-        user=User.objects.create_user(
+    if serializer.is_valid():
+        user = User.objects.create_user(
             username=username, email=email, password=None
         )
         confirmation_code = default_token_generator.make_token(user)
@@ -77,11 +84,11 @@ def send_code_and_create_user(request):
             'Код подтверждения',
             f'Код подтверждения: {confirmation_code}',
             'info@yamdb.ru',
-            [email,],
+            [email, ],
         )
         return Response(
-            'Код подтверждения отправлен на указанный email',
-            status=status.HTTP_201_CREATED
+            serializer.validated_data,
+            status=status.HTTP_200_OK
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,18 +101,20 @@ def get_tokens(user):
         'access': str(tokens.access_token)
     }
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_jwt(request):
     """Выдаёт JW-токен"""
-    username = request.data['username']
-    confirmation_code = request.data['confirmation_code']
+    username = request.data.get('username')
+    confirmation_code = request.data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
     if not default_token_generator.check_token(
         user, confirmation_code
     ):
         return Response(
-            'Некорректный код подтверждения', status=status.HTTP_400_BAD_REQUEST
+            'Некорректный код подтверждения',
+            status=status.HTTP_400_BAD_REQUEST
         )
     response = get_tokens(user)
     return Response(response, status=status.HTTP_200_OK)

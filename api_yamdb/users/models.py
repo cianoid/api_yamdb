@@ -4,35 +4,20 @@ from django.db import models
 
 class User(AbstractUser):
     """Модель пользователя"""
-    USER_ROLES = [
-        ('Admin', 'Администратор'),
-        ('Moderator', 'Модератор'),
-        ('User', 'Пользователь'),
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
+    ROLE_CHOICES = [
+        (ADMIN, 'Администратор'),
+        (MODERATOR, 'Модератор'),
+        (USER, 'Пользователь')
     ]
 
-    email = models.EmailField(
-        'Адрес электронной почты',
-        blank=True,
-        unique=True
-    )
-    username = models.CharField(
-        'Имя',
-        max_length=50,
-        blank=True,
-        null=True,
-        unique=True
-    )
+    email = models.EmailField(unique=True)
     role = models.CharField(
-        'Роль',
-        max_length=20,
-        choices=USER_ROLES,
-        default='User'
+        max_length=16,
+        choices=ROLE_CHOICES,
+        default=USER
     )
-    bio = models.TextField(
-        'О себе',
-        blank=True,
-    )
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+    bio = models.TextField(blank=True)
