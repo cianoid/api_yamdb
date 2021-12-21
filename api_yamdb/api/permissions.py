@@ -18,8 +18,6 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        # @TODO Подумать как сделать лучше
-        # if request.user.is_staff:
         if request.user.role == 'admin' or request.user.is_staff:
             return True
 
