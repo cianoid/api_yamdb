@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
 
 
-class CategoryRouter(DefaultRouter):
+class CategoryAndGenreRouter(DefaultRouter):
     include_format_suffixes = False

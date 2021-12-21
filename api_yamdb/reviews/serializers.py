@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
-from .models import Comments, Review, Title
+from .models import Comment, Review, Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -45,4 +45,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Comments
+        model = Comment

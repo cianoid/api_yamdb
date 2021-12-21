@@ -30,10 +30,11 @@ class Title(models.Model):
         max_length=256)
     year = models.PositiveSmallIntegerField()
     category = models.ForeignKey(
-        Category, default=0, on_delete=models.SET_DEFAULT,
+        Category, default=0, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='titles')
     genre = models.ManyToManyField(
-        Genre, related_name='titles')
+        Genre, related_name='titles', blank=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -64,14 +65,14 @@ class Review(models.Model):
         unique_together = ['author', 'title']
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField('comment text', blank=False)
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'comment date', auto_now_add=True)
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-pub_date']
