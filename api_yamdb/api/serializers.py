@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -20,6 +20,17 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(required=True, many=False)
     genre = GenreSerializer(required=True, many=True)
+    rating = serializers.SerializerMethodField('get_rating', read_only=True)
+
+    def get_rating(self, obj):
+        rating = 0
+
+        ratings = [review.score for review in
+                   Review.objects.filter(title_id=obj.pk)]
+        if ratings:
+            rating = round(sum(ratings) / len(ratings))
+
+        return rating
 
     def validate_year(self, value):
         if value > datetime.now().year:
