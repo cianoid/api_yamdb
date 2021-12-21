@@ -24,7 +24,28 @@ SECRET_KEY=some_secret_key
 Хоть в задании про это ничего не написано, но это хорошая практика. 
 Никакие приватные вещи не должны попадать в репозиторий
 
+### Импорт тестовых данных
+
+Импорт выполняется следующими комаднами в заданном порядке
+```
+python manage.py wipedata
+python manage.py importdata static/data/users.csv User
+python manage.py importdata static/data/category.csv Category
+python manage.py importdata static/data/genre.csv Genre
+python manage.py importdata static/data/titles.csv Title
+python manage.py importdata --relation-field genre static/data/genre_title.csv Title
+python manage.py importdata static/data/review.csv Review
+python manage.py importdata static/data/comments.csv Comment
+```
+
+Помощь по команде находится тут
+```
+python manage.py help importdata
+```
+
+
 ### Важные моменты
+
 1. Если планируете работать с основной веткой, то не забывайте делать 
 **git pull** чтобы забрать последние изменения
 
