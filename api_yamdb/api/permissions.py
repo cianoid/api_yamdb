@@ -24,3 +24,10 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
             return True
 
         return False
+
+
+class AdminOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.role == 'admin':
+            return True
+        return False

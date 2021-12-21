@@ -8,8 +8,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 from api.filters import TitleFilter
-from api.permissions import AdminOrReadOnlyPermission
+from api.permissions import AdminOrReadOnlyPermission, AdminOnly
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer, SignUpSerializer,
                              UserSerializer)
@@ -49,6 +50,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AdminOnly]
 
 
 @api_view(['POST'])
