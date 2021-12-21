@@ -26,6 +26,7 @@ title_router.registry.extend(category_and_genre_router.registry)
 
 users_router = routers.DefaultRouter()
 users_router.register('users', UserViewSet, basename='users')
+users_router.register(r'users/(?P<username>[\w.@+-]+)/', UserViewSet, basename='user')
 
 # зачем каждому свой дефолтный роутер? лучше так:
 # v1_router = = routers.DefaultRouter()

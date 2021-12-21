@@ -10,12 +10,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from api.filters import TitleFilter
-from api.permissions import (AdminOrReadOnlyPermission, AdminOrSuperuserOnly,
+from api.permissions import (AdminOrReadOnlyPermission, AdminOrSuperuser,
                              AuthorOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer, SignUpSerializer,
-                             ConfirmationCodeSerializer, UserSerializer)
+                             ConfirmationCodeSerializer, UserSerializer,
+                             UserMeSerializer)
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
 
@@ -50,18 +51,22 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели User"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, AdminOrSuperuserOnly]
+    permission_classes = [IsAuthenticated, AdminOrSuperuser]
 
-    @action(detail=False, methods=['get', 'patch'])
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated])
     def me(self, request):
         user = self.request.user
         if request.method == 'GET':
             serializer = self.get_serializer(user)
             return Response(serializer.data)
         if request.method == 'PATCH':
-            serializer = self.get_serializer(
+            serializer = UserMeSerializer(
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)

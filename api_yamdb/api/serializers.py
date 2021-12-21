@@ -35,15 +35,43 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'username', 'bio', 'email', 'role'
         ]
 
-    def validate(self, data):
-        """Запрещает пользователю изменить свою роль
-        """
-        role = self.context['request'].user.role
-        if data.get('role') and role == 'user':
-            raise serializers.ValidationError(
-                'Изменение роли невозможно'
+
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        ]
+
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data.get(
+            'first_name',
+            instance.first_name
+        )
+        instance.last_name = validated_data.get(
+            'last_name',
+            instance.last_name
+        )
+        instance.username = validated_data.get(
+            'username',
+            instance.username
+        )
+        instance.bio = validated_data.get(
+            'bio',
+            instance.bio
+        )
+        instance.email = validated_data.get(
+            'email',
+            instance.email
+        )
+
+        if instance.role == 'admin' or instance.is_staff:
+            instance.role = validated_data.get(
+                'role',
+                instance.role
             )
-        return data
+        instance.save()
+        return instance
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
