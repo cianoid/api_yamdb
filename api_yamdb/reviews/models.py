@@ -44,13 +44,13 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='review'
+        related_name='reviews'
     )
     text = models.TextField(blank=False)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='review'
+        related_name='reviews'
     )
     pub_date = models.DateTimeField(
         'review date', auto_now_add=True
