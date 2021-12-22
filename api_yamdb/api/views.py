@@ -43,10 +43,18 @@ class GenreViewSet(CategoryAndGenreViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
     permission_classes = (AdminOrReadOnlyPermission,)
-    filter_backends = (django_filters.DjangoFilterBackend,)
+    filter_backends = (django_filters.DjangoFilterBackend, )
     filterset_class = TitleFilter
+
+    def get_queryset(self):
+        queryset = Title.objects.all()
+
+        name = self.request.query_params.get('name')
+        if name is not None:
+            queryset = queryset.filter(name__startswith=name)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
