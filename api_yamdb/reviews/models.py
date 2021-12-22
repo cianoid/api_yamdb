@@ -36,6 +36,9 @@ class Title(models.Model):
         Genre, related_name='titles', blank=True, through='TitlesGenre')
     description = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ['pk']
+
     def __str__(self):
         return self.name
 
