@@ -120,6 +120,14 @@ def send_code_and_create_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+def get_tokens(user):
+    """Создаёт токен в нужном формате"""
+    tokens = RefreshToken.for_user(user)
+    return {
+        'access': str(tokens.access_token)
+    }
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_jwt(request):
@@ -129,18 +137,15 @@ def get_jwt(request):
     username = request.data.get('username')
     confirmation_code = request.data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
-
-    if default_token_generator.check_token(
+    if not default_token_generator.check_token(
         user, confirmation_code
     ):
-        token = RefreshToken.for_user(user)
         return Response(
-            {'token': str(token)}, status=status.HTTP_200_OK
+            'Некорректный код подтверждения',
+            status=status.HTTP_400_BAD_REQUEST
         )
-    return Response(
-        {'confirmation_code': 'Неверный код подтверждения'},
-        status=status.HTTP_400_BAD_REQUEST
-    )
+    response = get_tokens(user)
+    return Response(response, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
