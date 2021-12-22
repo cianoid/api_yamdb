@@ -1,4 +1,4 @@
-from rest_framework import permissions, status
+from rest_framework import permissions
 
 
 class AdminOrReadOnlyPermission(permissions.BasePermission):
@@ -32,8 +32,9 @@ class AuthorOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        if (request.user.is_staff or
-                request.user.role in ('admin', 'moderator')):
+        admins = ('admin', 'moderator')
+
+        if request.user.is_staff or request.user.role in admins:
             return True
 
         return obj.author == request.user

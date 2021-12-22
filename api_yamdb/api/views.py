@@ -1,6 +1,6 @@
-from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, status, viewsets
@@ -16,7 +16,7 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              ConfirmationCodeSerializer, GenreSerializer,
                              ReviewSerializer, SignUpSerializer,
                              TitleSerializer, TitleSerializerList,
-                             UserSerializer, UserMeSerializer)
+                             UserMeSerializer, UserSerializer)
 from reviews.models import Category, Genre, Review, Title
 
 User = get_user_model()

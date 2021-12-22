@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
@@ -18,4 +18,3 @@ class Command(BaseCommand):
         Category.objects.all().delete()
         Comment.objects.all().delete()
         Review.objects.all().delete()
-

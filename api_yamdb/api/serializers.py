@@ -53,13 +53,14 @@ class TitleSerializer(serializers.ModelSerializer):
             'genre': attrs.get('genre')}
         errors = {}
 
-        if (fields['category'] is not None and
-                not Category.objects.filter(slug=fields['category']).exists()):
+        if (fields['category'] is not None
+                and not Category.objects.filter(
+                    slug=fields['category']).exists()):
             errors.update({'category': 'Таких записей нет в БД'})
 
-        if (fields['genre'] is not None and
-                Genre.objects.filter(slug__in=fields['genre']).count() !=
-                len(fields['genre'])):
+        if (fields['genre'] is not None
+                and Genre.objects.filter(
+                    slug__in=fields['genre']).count() != len(fields['genre'])):
             errors.update({'genre': 'Таких записей нет в БД'})
 
         if errors:
@@ -106,7 +107,8 @@ class TitleSerializer(serializers.ModelSerializer):
             TitlesGenre.objects.filter(title=obj).delete()
 
             for genre in genres:
-                TitlesGenre(title=obj, genre=Genre.objects.get(slug=genre)).save()
+                TitlesGenre(
+                    title=obj, genre=Genre.objects.get(slug=genre)).save()
 
         return obj
 
