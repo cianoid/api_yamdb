@@ -49,14 +49,9 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         fields = {
-            'category': self.initial_data.get('category'),
-            'genre': self.initial_data.get('genre')}
+            'category': attrs.get('category'),
+            'genre': attrs.get('genre')}
         errors = {}
-
-        # for field_name, field_value in fields.items():
-        #     if field_value is None:
-        #         errors.update({field_name: 'Отсутствует обязательное поле'})
-        #         pass
 
         if (fields['category'] is not None and
                 not Category.objects.filter(slug=fields['category']).exists()):
