@@ -11,6 +11,9 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50, unique=True)
 
+    class Meta:
+        ordering = ['pk']
+
     def __str__(self):
         return self.name
 
@@ -20,6 +23,9 @@ class Genre(models.Model):
         max_length=256)
     slug = models.SlugField(
         max_length=50, unique=True)
+
+    class Meta:
+        ordering = ['pk']
 
     def __str__(self):
         return self.name
