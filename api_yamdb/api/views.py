@@ -49,8 +49,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Title.objects.all()
-
         name = self.request.query_params.get('name')
+
         if name is not None:
             queryset = queryset.filter(name__startswith=name)
 
@@ -59,6 +59,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
             return TitleSerializerList
+
         return TitleSerializer
 
 
@@ -75,16 +76,21 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated])
     def me(self, request):
         user = self.request.user
+
         if request.method == 'GET':
             serializer = self.get_serializer(user)
+
             return Response(serializer.data)
+
         if request.method == 'PATCH':
             serializer = UserMeSerializer(
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         return Response(status=status.HTTP_403_FORBIDDEN)
 
 
@@ -94,22 +100,27 @@ def send_code_and_create_user(request):
     """Создаёт пользователя и отправляет код подтверждения"""
     email = request.data.get('email')
     username = request.data.get('username')
+
     if username == 'me':
         return Response(
             'Использование такого имени запрещено',
             status=status.HTTP_400_BAD_REQUEST
         )
+
     if User.objects.filter(email=email).exists():
         return Response(
             'Пользователь с таким email уже существует',
             status=status.HTTP_400_BAD_REQUEST
         )
+
     if User.objects.filter(username=username).exists():
         return Response(
             'Пользователь с таким username уже существует',
             status=status.HTTP_400_BAD_REQUEST
         )
+
     serializer = SignUpSerializer(data=request.data)
+
     if serializer.is_valid():
         user = User.objects.create_user(
             username=username, email=email, password=None
@@ -121,16 +132,19 @@ def send_code_and_create_user(request):
             'info@yamdb.ru',
             [email, ],
         )
+
         return Response(
             serializer.validated_data,
             status=status.HTTP_200_OK
         )
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_tokens(user):
     """Создаёт токен в нужном формате"""
     tokens = RefreshToken.for_user(user)
+
     return {
         'access': str(tokens.access_token)
     }
@@ -145,6 +159,7 @@ def get_jwt(request):
     username = request.data.get('username')
     confirmation_code = request.data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
+
     if not default_token_generator.check_token(
         user, confirmation_code
     ):
@@ -152,7 +167,9 @@ def get_jwt(request):
             'Некорректный код подтверждения',
             status=status.HTTP_400_BAD_REQUEST
         )
+
     response = get_tokens(user)
+
     return Response(response, status=status.HTTP_200_OK)
 
 
@@ -167,6 +184,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
+
         return title.reviews.all()
 
 
@@ -180,4 +198,5 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
+
         return review.comments.all()
