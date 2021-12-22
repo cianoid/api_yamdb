@@ -81,8 +81,27 @@ class TitleSerializer(serializers.ModelSerializer):
         obj.save()
 
         for genre in genres:
-            TitlesGenre.objects.create(
-                title=obj, genre=Genre.objects.get(slug=genre)).save()
+            TitlesGenre(title=obj, genre=Genre.objects.get(slug=genre)).save()
+
+        return obj
+
+    def update(self, obj, validated_data):
+        genres = validated_data.pop('genre')
+        category = validated_data.pop('category')
+
+        data = validated_data
+        data['category'] = Category.objects.get(slug=category)
+
+        for field, value in data.items():
+            if getattr(obj, field) != value:
+                setattr(obj, field, value)
+
+        obj.save()
+
+        TitlesGenre.objects.filter(title=obj).delete()
+
+        for genre in genres:
+            TitlesGenre(title=obj, genre=Genre.objects.get(slug=genre)).save()
 
         return obj
 
