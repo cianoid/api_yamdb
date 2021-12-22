@@ -26,7 +26,7 @@ class TitleSerializerList(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField('get_rating', read_only=True)
 
     def get_rating(self, obj):
-        rating = 0
+        rating = None
 
         ratings = [review.score for review in
                    Review.objects.filter(title_id=obj.pk)]
@@ -41,8 +41,8 @@ class TitleSerializerList(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(required=True)
-    genre = serializers.ListField(required=True, write_only=True)
+    category = serializers.CharField(required=False)
+    genre = serializers.ListField(required=False)
 
     def to_representation(self, instance):
         return TitleSerializerList(instance).to_representation(instance)
@@ -53,20 +53,22 @@ class TitleSerializer(serializers.ModelSerializer):
             'genre': self.initial_data.get('genre')}
         errors = {}
 
-        for field_name, field_value in fields.items():
-            if field_value is None:
-                errors.update({field_name: 'Отсутствует обязательное поле'})
-                pass
+        # for field_name, field_value in fields.items():
+        #     if field_value is None:
+        #         errors.update({field_name: 'Отсутствует обязательное поле'})
+        #         pass
+
+        if (fields['category'] is not None and
+                not Category.objects.filter(slug=fields['category']).exists()):
+            errors.update({'category': 'Таких записей нет в БД'})
+
+        if (fields['genre'] is not None and
+                Genre.objects.filter(slug__in=fields['genre']).count() !=
+                len(fields['genre'])):
+            errors.update({'genre': 'Таких записей нет в БД'})
 
         if errors:
             raise ValidationError(errors)
-
-        if not Category.objects.filter(slug=fields['category']).exists():
-            errors.update({'category': 'Таких записей нет в БД'})
-
-        if not Genre.objects.filter(
-                slug__in=fields['genre']).count() == len(fields['genre']):
-            errors.update({'genre': 'Таких записей нет в БД'})
 
         return attrs
 
@@ -86,11 +88,18 @@ class TitleSerializer(serializers.ModelSerializer):
         return obj
 
     def update(self, obj, validated_data):
-        genres = validated_data.pop('genre')
-        category = validated_data.pop('category')
+        genres = None
+        category = None
+
+        if validated_data.get('genre') is not None:
+            genres = validated_data.pop('genre')
+
+        if validated_data.get('category') is not None:
+            category = validated_data.pop('category')
 
         data = validated_data
-        data['category'] = Category.objects.get(slug=category)
+        if category:
+            data['category'] = Category.objects.get(slug=category)
 
         for field, value in data.items():
             if getattr(obj, field) != value:
@@ -98,10 +107,11 @@ class TitleSerializer(serializers.ModelSerializer):
 
         obj.save()
 
-        TitlesGenre.objects.filter(title=obj).delete()
+        if genres:
+            TitlesGenre.objects.filter(title=obj).delete()
 
-        for genre in genres:
-            TitlesGenre(title=obj, genre=Genre.objects.get(slug=genre)).save()
+            for genre in genres:
+                TitlesGenre(title=obj, genre=Genre.objects.get(slug=genre)).save()
 
         return obj
 
