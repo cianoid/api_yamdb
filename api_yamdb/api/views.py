@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
@@ -8,17 +9,17 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-
 from api.filters import TitleFilter
 from api.permissions import (AdminOrReadOnlyPermission, AdminOrSuperuser,
                              AuthorOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, ReviewSerializer,
-                             TitleSerializer, SignUpSerializer,
-                             ConfirmationCodeSerializer, UserSerializer,
-                             UserMeSerializer)
-from reviews.models import Category, Genre, Title, Review
-from users.models import User
+                             ConfirmationCodeSerializer, GenreSerializer,
+                             ReviewSerializer, SignUpSerializer,
+                             TitleSerializer, TitleSerializerList,
+                             UserSerializer, UserMeSerializer)
+from reviews.models import Category, Genre, Review, Title
+
+User = get_user_model()
 
 
 class CategoryAndGenreViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
@@ -43,11 +44,14 @@ class GenreViewSet(CategoryAndGenreViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-
     permission_classes = (AdminOrReadOnlyPermission,)
     filter_backends = (django_filters.DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleSerializerList
+        return TitleSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -150,7 +154,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
-        return title.review.all()
+        return title.reviews.all()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
