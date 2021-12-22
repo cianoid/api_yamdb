@@ -181,7 +181,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
-        slug_field='title',
+        slug_field='name',
         read_only=True,
     )
     author = serializers.SlugRelatedField(
