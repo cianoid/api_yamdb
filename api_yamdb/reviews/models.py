@@ -76,7 +76,10 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-pub_date', ]
-        unique_together = ['author', 'title']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'], name='unique review')
+        ]
 
 
 class Comment(models.Model):
