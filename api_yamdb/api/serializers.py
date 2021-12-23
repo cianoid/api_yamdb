@@ -194,12 +194,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         request = self.context['request']
+        if request.method != 'POST':
+            return data
+        
         title_id = self.context['view'].kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
-
-        if self.context['request'].method != 'POST':
-            return data
-
+        
         if Review.objects.filter(
                 title=title,
                 author=request.user
@@ -207,6 +207,10 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise ValidationError('Only one review is allowed')
 
         return data
+
+    class Meta:
+        model = Review
+        fields = '__all__'
 
     class Meta:
         model = Review
