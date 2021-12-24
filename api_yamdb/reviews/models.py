@@ -12,7 +12,9 @@ class Category(models.Model):
         max_length=50, unique=True)
 
     class Meta:
-        ordering = ['pk']
+        ordering = ('pk',)
+        verbose_name = 'категорию'
+        verbose_name_plural = 'категории'
 
     def __str__(self):
         return self.name
@@ -25,7 +27,9 @@ class Genre(models.Model):
         max_length=50, unique=True)
 
     class Meta:
-        ordering = ['pk']
+        ordering = ('pk',)
+        verbose_name = 'жанр'
+        verbose_name_plural = 'жанры'
 
     def __str__(self):
         return self.name
@@ -43,13 +47,17 @@ class Title(models.Model):
     description = models.TextField(blank=True)
 
     class Meta:
-        ordering = ['pk']
+        ordering = ('pk',)
+        verbose_name = 'произведение'
+        verbose_name_plural = 'произведения'
 
     def __str__(self):
         return self.name
 
 
 class TitlesGenre(models.Model):
+    ADMIN_ZONE = False
+
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
@@ -71,14 +79,16 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         'review score',
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
+        validators=(MinValueValidator(1), MaxValueValidator(10))
     )
 
     class Meta:
-        ordering = ['-pub_date', ]
+        ordering = ('-pub_date',)
+        verbose_name = 'ревью'
+        verbose_name_plural = 'ревью'
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'], name='unique review')
+                fields=('author', 'title'), name='unique review')
         ]
 
 
@@ -92,4 +102,6 @@ class Comment(models.Model):
         'comment date', auto_now_add=True)
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'комментарии'
