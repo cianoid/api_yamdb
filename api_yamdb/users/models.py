@@ -24,3 +24,13 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['pk']
+
+    @property
+    def is_moderator(self):
+        """Проверяет наличие роли Модератор."""
+        return self.role == 'moderator'
+
+    @property
+    def is_admin(self):
+        """Проверяет аличие роли Администратор."""
+        return self.role == 'admin'
