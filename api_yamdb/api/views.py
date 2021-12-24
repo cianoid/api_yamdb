@@ -44,7 +44,7 @@ class GenreViewSet(CategoryAndGenreViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrReadOnlyPermission,)
-    filter_backends = (django_filters.DjangoFilterBackend, )
+    filter_backends = (django_filters.DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_queryset(self):
@@ -57,7 +57,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ('list', 'retrieve'):
             return TitleSerializerList
 
         return TitleSerializer
@@ -67,13 +67,13 @@ class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели User"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, AdminOrSuperuser]
+    permission_classes = (IsAuthenticated, AdminOrSuperuser)
     lookup_field = 'username'
 
     @action(
         detail=False,
         methods=['get', 'patch'],
-        permission_classes=[IsAuthenticated])
+        permission_classes=(IsAuthenticated,))
     def me(self, request):
         user = self.request.user
 
@@ -161,7 +161,7 @@ def get_jwt(request):
     user = get_object_or_404(User, username=username)
 
     if not default_token_generator.check_token(
-        user, confirmation_code
+            user, confirmation_code
     ):
         return Response(
             'Некорректный код подтверждения',
@@ -175,7 +175,7 @@ def get_jwt(request):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [AuthorOrReadOnly, ]
+    permission_classes = (AuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title,
@@ -190,7 +190,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [AuthorOrReadOnly, ]
+    permission_classes = (AuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs['review_id'])
