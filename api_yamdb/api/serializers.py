@@ -111,13 +111,6 @@ class TitleSerializer(serializers.ModelSerializer):
 
         return obj
 
-    def validate_year(self, value):
-        if value > datetime.now().year:
-            raise serializers.ValidationError(
-                'Нельзя постить посты из будущего')
-
-        return value
-
     class Meta:
         fields = '__all__'
         model = Title

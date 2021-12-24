@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -38,7 +40,8 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         max_length=256)
-    year = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField(
+        validators=(MaxValueValidator(datetime.now().year),))
     category = models.ForeignKey(
         Category, default=0, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='titles')
