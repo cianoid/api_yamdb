@@ -83,7 +83,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         if request.method == 'PATCH':
-            serializer = UserMeSerializer(
+            serializer = self.get_serializer(
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
@@ -92,6 +92,11 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_403_FORBIDDEN)
+
+    def get_serializer_class(self):
+        if self.action == 'me':
+            return UserMeSerializer
+        return super().get_serializer_class()
 
 
 @api_view(['POST'])
