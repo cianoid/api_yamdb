@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from rest_framework import filters, mixins, status, viewsets
@@ -46,15 +47,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrReadOnlyPermission,)
     filter_backends = (django_filters.DjangoFilterBackend,)
     filterset_class = TitleFilter
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        name = self.request.query_params.get('name')
-
-        if name is not None:
-            queryset = queryset.filter(name__startswith=name)
-
-        return queryset
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

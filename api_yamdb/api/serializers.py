@@ -22,17 +22,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializerList(serializers.ModelSerializer):
     category = CategorySerializer(required=False, many=False, read_only=True)
     genre = GenreSerializer(required=False, many=True)
-    rating = serializers.SerializerMethodField('get_rating', read_only=True)
-
-    def get_rating(self, obj):
-        rating = None
-
-        ratings = [review.score for review in
-                   Review.objects.filter(title_id=obj.pk)]
-        if ratings:
-            rating = round(sum(ratings) / len(ratings))
-
-        return rating
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         fields = '__all__'
@@ -187,6 +177,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         request = self.context['request']
+
         if request.method != 'POST':
             return data
         
@@ -200,10 +191,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise ValidationError('Only one review is allowed')
 
         return data
-
-    class Meta:
-        model = Review
-        fields = '__all__'
 
     class Meta:
         model = Review
