@@ -11,6 +11,9 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50, unique=True)
 
+    class Meta:
+        ordering = ['pk']
+
     def __str__(self):
         return self.name
 
@@ -20,6 +23,9 @@ class Genre(models.Model):
         max_length=256)
     slug = models.SlugField(
         max_length=50, unique=True)
+
+    class Meta:
+        ordering = ['pk']
 
     def __str__(self):
         return self.name
@@ -33,11 +39,19 @@ class Title(models.Model):
         Category, default=0, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='titles')
     genre = models.ManyToManyField(
-        Genre, related_name='titles', blank=True)
+        Genre, related_name='titles', blank=True, through='TitlesGenre')
     description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['pk']
 
     def __str__(self):
         return self.name
+
+
+class TitlesGenre(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
 
 class Review(models.Model):
@@ -62,7 +76,10 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-pub_date', ]
-        unique_together = ['author', 'title']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'], name='unique review')
+        ]
 
 
 class Comment(models.Model):

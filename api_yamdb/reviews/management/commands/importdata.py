@@ -5,7 +5,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Comment, Review, Title
 
 User = get_user_model()
 

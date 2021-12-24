@@ -21,3 +21,6 @@ class User(AbstractUser):
         default=USER
     )
     bio = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['pk']
