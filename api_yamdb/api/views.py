@@ -118,6 +118,9 @@ def send_code_and_create_user(request):
 
 def get_tokens(user):
     """Создаёт токен в нужном формате"""
+    # функция получает только access_token
+    # выделено в отдельную функцию, чтобы было проще 
+    # изменить формат токена при необходимости
     tokens = RefreshToken.for_user(user)
     return {
         'access': str(tokens.access_token)
