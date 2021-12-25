@@ -28,7 +28,6 @@ class CategoryAndGenreViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
                               mixins.ListModelMixin, mixins.DestroyModelMixin):
     lookup_field = 'slug'
     lookup_value_regex = '[-a-zA-Z0-9_]+'
-
     permission_classes = (AdminOrReadOnlyPermission,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -91,6 +90,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'me':
             return UserMeSerializer
+
         return super().get_serializer_class()
 
 
@@ -129,7 +129,7 @@ def send_code_and_create_user(request):
         'Код подтверждения',
         f'Код подтверждения: {confirmation_code}',
         settings.FROM_EMAIL,
-        [email, ],
+        (email, ),
     )
 
     return Response(serializer.validated_data, status=status.HTTP_200_OK)
