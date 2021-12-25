@@ -6,10 +6,12 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        if not request.user.is_authenticated:
+        user = request.user
+
+        if not user.is_authenticated:
             return False
 
-        if request.user.role == 'admin' or request.user.is_staff:
+        if user.is_admin or user.is_staff:
             return True
 
         return False
@@ -32,9 +34,12 @@ class AuthorOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        admins = ('admin', 'moderator')
+        user = request.user
 
-        if request.user.is_staff or request.user.role in admins:
+        if not user.is_authenticated:
+            return False
+
+        if user.is_staff or user.is_admin or user.is_moderator:
             return True
 
-        return obj.author == request.user
+        return obj.author == user
