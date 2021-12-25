@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -77,7 +78,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         if request.method == 'PATCH':
-            serializer = UserMeSerializer(
+            serializer = self.get_serializer(
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
@@ -86,6 +87,11 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_403_FORBIDDEN)
+
+    def get_serializer_class(self):
+        if self.action == 'me':
+            return UserMeSerializer
+        return super().get_serializer_class()
 
 
 @api_view(['POST'])
@@ -114,29 +120,26 @@ def send_code_and_create_user(request):
         )
 
     serializer = SignUpSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = User.objects.create_user(
+        username=username, email=email, password=None
+    )
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        'Код подтверждения',
+        f'Код подтверждения: {confirmation_code}',
+        settings.FROM_EMAIL,
+        [email, ],
+    )
 
-    if serializer.is_valid():
-        user = User.objects.create_user(
-            username=username, email=email, password=None
-        )
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            'Код подтверждения',
-            f'Код подтверждения: {confirmation_code}',
-            'info@yamdb.ru',
-            [email, ],
-        )
-
-        return Response(
-            serializer.validated_data,
-            status=status.HTTP_200_OK
-        )
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 def get_tokens(user):
     """Создаёт токен в нужном формате"""
+    # в этом задании используем только access_token
+    # выделено отдельной функцией для удобного изменения содержимого токена
+    # без изменения функции, которая этот токен выдаёт
     tokens = RefreshToken.for_user(user)
 
     return {

@@ -24,3 +24,15 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['pk']
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+    @property
+    def is_moderator(self):
+        """Проверяет наличие роли Модератор."""
+        return self.role == 'moderator'
+
+    @property
+    def is_admin(self):
+        """Проверяет аличие роли Администратор."""
+        return self.role == 'admin'

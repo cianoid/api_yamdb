@@ -115,42 +115,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserMeSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
     class Meta:
         model = User
         fields = [
             'first_name', 'last_name', 'username', 'bio', 'email', 'role'
         ]
-
-    def update(self, instance, validated_data):
-        instance.first_name = validated_data.get(
-            'first_name',
-            instance.first_name
-        )
-        instance.last_name = validated_data.get(
-            'last_name',
-            instance.last_name
-        )
-        instance.username = validated_data.get(
-            'username',
-            instance.username
-        )
-        instance.bio = validated_data.get(
-            'bio',
-            instance.bio
-        )
-        instance.email = validated_data.get(
-            'email',
-            instance.email
-        )
-
-        if instance.role == 'admin' or instance.is_staff:
-            instance.role = validated_data.get(
-                'role',
-                instance.role
-            )
-        instance.save()
-
-        return instance
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
@@ -180,10 +151,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 
         if request.method != 'POST':
             return data
-        
+
         title_id = self.context['view'].kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
-        
+
         if Review.objects.filter(
                 title=title,
                 author=request.user
