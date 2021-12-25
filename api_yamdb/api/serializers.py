@@ -30,76 +30,12 @@ class TitleSerializerList(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(required=False)
-    genre = serializers.ListField(required=False)
-
-    def to_representation(self, instance):
-        return TitleSerializerList(instance).to_representation(instance)
-
-    def validate(self, attrs):
-        fields = {
-            'category': attrs.get('category'),
-            'genre': attrs.get('genre')}
-        errors = {}
-
-        if (fields['category'] is not None
-                and not Category.objects.filter(
-                    slug=fields['category']).exists()):
-            errors.update({'category': 'Таких записей нет в БД'})
-
-        if (fields['genre'] is not None
-                and Genre.objects.filter(
-                    slug__in=fields['genre']).count() != len(fields['genre'])):
-            errors.update({'genre': 'Таких записей нет в БД'})
-
-        if errors:
-            raise ValidationError(errors)
-
-        return attrs
-
-    def create(self, validated_data):
-        genres = validated_data.pop('genre')
-        category = validated_data.pop('category')
-
-        data = validated_data
-        data['category'] = Category.objects.get(slug=category)
-
-        obj = Title(**data)
-        obj.save()
-
-        for genre in genres:
-            TitlesGenre(title=obj, genre=Genre.objects.get(slug=genre)).save()
-
-        return obj
-
-    def update(self, obj, validated_data):
-        genres = None
-        category = None
-
-        if validated_data.get('genre') is not None:
-            genres = validated_data.pop('genre')
-
-        if validated_data.get('category') is not None:
-            category = validated_data.pop('category')
-
-        data = validated_data
-        if category:
-            data['category'] = Category.objects.get(slug=category)
-
-        for field, value in data.items():
-            if getattr(obj, field) != value:
-                setattr(obj, field, value)
-
-        obj.save()
-
-        if genres:
-            TitlesGenre.objects.filter(title=obj).delete()
-
-            for genre in genres:
-                TitlesGenre(
-                    title=obj, genre=Genre.objects.get(slug=genre)).save()
-
-        return obj
+    category = serializers.SlugRelatedField(
+        required=True, many=False, slug_field='slug',
+        queryset=Category.objects.all())
+    genre = serializers.SlugRelatedField(
+        required=True, many=True, slug_field='slug',
+        queryset=Genre.objects.all())
 
     class Meta:
         fields = '__all__'
